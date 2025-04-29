@@ -1,6 +1,6 @@
 {
     "name": "@azguardwallet/client",
-    "version": "0.3.2",
+    "version": "0.4.0",
     "description": "Simple client for interacting with Azguard Wallet via inpage RPC with various providers",
     "author": "Azguard Wallet",
     "homepage": "https://github.com/AzguardWallet/azguard-wallet-client",
