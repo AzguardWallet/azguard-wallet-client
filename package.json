@@ -26,6 +26,6 @@
         "build": "rm -rf dist && tsc"
     },
     "devDependencies": {
-        "@azguardwallet/types": "0.3.2"
+        "@azguardwallet/types": "0.4.0"
     }
 }

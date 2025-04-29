@@ -1,1 +1,0 @@
-export { ShieldSwapAzguardProvider } from "./shieldswap";
