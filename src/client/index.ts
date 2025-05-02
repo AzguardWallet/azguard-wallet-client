@@ -152,13 +152,14 @@ export class AzguardClient {
         localStorage.removeItem(`azguard:session:${this.#scope}`);
     };
 
-    async #init(): Promise<AzguardClient> {
-        if (window.azguard) {
-            if (!isCompatible(window.azguard.version)) {
+    async #init(timeout: number): Promise<AzguardClient> {
+        const azguard = await AzguardClient.getAzguardObject(timeout);
+        if (azguard !== undefined) {
+            if (!isCompatible(azguard.version)) {
                 console.warn("Client version is not compatible with the wallet version");
             }
 
-            const client = window.azguard.createClient();
+            const client = azguard.createClient();
             client.on("session_updated", this.#onSessionUpdated);
             client.on("session_closed", this.#onSessionClosed);
 
@@ -176,24 +177,58 @@ export class AzguardClient {
     /**
      * Creates Azguard client
      * @param scope Session scope (you can create multiple clients with different scopes to have parallel sessions with the wallet)
+     * @param timeout Timeout in ms for the `window.azguard` object lookup
      * @returns AzguardClient instance
      */
-    public static create(scope?: string): Promise<AzguardClient> {
-        return new AzguardClient(scope ?? "default").#init();
+    public static create(scope?: string, timeout: number = 300): Promise<AzguardClient> {
+        return new AzguardClient(scope ?? "default").#init(timeout);
     }
 
     /**
-     * Checks if the Azguard Wallet extension is installed, by observing the `window.azguard` object
+     * Returns the `window.azguard` object or `undefined` if it doesn't exist.
+     * Since content scripts load asynchronously, the `window.azguard` object may appear with some delay,
+     * therefore this method does multiple retries with the specified `timeout`.
+     * @param timeout Lookup timeout in ms
      */
-    public static isAzguardInstalled(): boolean {
-        return !!window.azguard;
+    public static getAzguardObject(
+        timeout: number = 300,
+    ): Promise<{ version: string; createClient: () => AzguardRpcClient; } | undefined> {
+        return new Promise((resolve) => {
+            let rest = timeout;
+            const id = setInterval(() => {
+                rest -= 10;
+                if (window.azguard) {
+                    clearInterval(id);
+                    resolve(window.azguard);
+                }
+                else if (rest <= 0) {
+                    clearInterval(id);
+                    resolve(undefined);
+                }
+            }, 10);
+        });
+    };
+
+    /**
+     * Checks if the Azguard Wallet extension is installed, by observing the `window.azguard` object.
+     * Since content scripts load asynchronously, the `window.azguard` object may appear with some delay,
+     * therefore this method does multiple retries with the specified `timeout`.
+     * @param timeout Lookup timeout in ms
+     */
+    public static async isAzguardInstalled(timeout: number = 300): Promise<boolean> {
+        const azguard = await AzguardClient.getAzguardObject(timeout);
+        return azguard !== undefined;
     }
 
     /**
      * Checks if the Azguard Wallet extension is installed, by observing the `window.azguard` object,
-     * and also checks if the wallet and client versions are compatible (if not, the client may not work properly)
+     * and also checks if the wallet and client versions are compatible (if not, the client may not work properly).
+     * Since content scripts load asynchronously, the `window.azguard` object may appear with some delay,
+     * therefore this method does multiple retries with the specified `timeout`.
+     * @param timeout Lookup timeout in ms
      */
-    public static isAzguardInstalledAndCompatible(): boolean {
-        return !!window.azguard && isCompatible(window.azguard.version);
+    public static async isAzguardInstalledAndCompatible(timeout = 300): Promise<boolean> {
+        const azguard = await AzguardClient.getAzguardObject(timeout);
+        return azguard !== undefined && isCompatible(azguard.version);
     }
 }
