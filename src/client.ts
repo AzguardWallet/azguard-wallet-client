@@ -122,21 +122,20 @@ export class AzguardClient {
     }
 
     readonly #onSessionUpdated = (session: DappSession) => {
-        const permissionsChanged = (
+        const permissionsChanged =
             this.permissions.length !== session.permissions.length ||
-            this.permissions.some((p, i) => (
-                (p.chains?.length ?? 0) !== (session.permissions[i].chains?.length ?? 0) ||
-                p.chains?.some((c, j) => c !== session.permissions[i].chains![j]) ||
-                (p.methods?.length ?? 0) !== (session.permissions[i].methods?.length ?? 0) ||
-                p.methods?.some((m, j) => m !== session.permissions[i].methods![j]) ||
-                (p.events?.length ?? 0) !== (session.permissions[i].events?.length ?? 0) ||
-                p.events?.some((e, j) => e !== session.permissions[i].events![j])
-            ))
-        );
-        const accountsChanged = (
+            this.permissions.some(
+                (p, i) =>
+                    (p.chains?.length ?? 0) !== (session.permissions[i].chains?.length ?? 0) ||
+                    p.chains?.some((c, j) => c !== session.permissions[i].chains![j]) ||
+                    (p.methods?.length ?? 0) !== (session.permissions[i].methods?.length ?? 0) ||
+                    p.methods?.some((m, j) => m !== session.permissions[i].methods![j]) ||
+                    (p.events?.length ?? 0) !== (session.permissions[i].events?.length ?? 0) ||
+                    p.events?.some((e, j) => e !== session.permissions[i].events![j]),
+            );
+        const accountsChanged =
             this.accounts.length !== session.accounts.length ||
-            this.accounts.some((a, i) => a !== session.accounts[i])
-        );
+            this.accounts.some((a, i) => a !== session.accounts[i]);
         this.#session = session;
         if (permissionsChanged) {
             this.#onPermissionsChanged.dispatch(this.permissions);
@@ -165,7 +164,7 @@ export class AzguardClient {
 
             const sessionId = localStorage.getItem(`azguard:session:${this.#scope}`);
             const session = sessionId
-                ? await client.request("get_session", sessionId) ?? undefined
+                ? (await client.request("get_session", sessionId)) ?? undefined
                 : undefined;
 
             this.#rpc = client;
@@ -192,7 +191,7 @@ export class AzguardClient {
      */
     public static getAzguardObject(
         timeout: number = 300,
-    ): Promise<{ version: string; createClient: () => AzguardRpcClient; } | undefined> {
+    ): Promise<{ version: string; createClient: () => AzguardRpcClient } | undefined> {
         return new Promise((resolve) => {
             let rest = timeout;
             const id = setInterval(() => {
@@ -200,14 +199,13 @@ export class AzguardClient {
                 if (window.azguard) {
                     clearInterval(id);
                     resolve(window.azguard);
-                }
-                else if (rest <= 0) {
+                } else if (rest <= 0) {
                     clearInterval(id);
                     resolve(undefined);
                 }
             }, 10);
         });
-    };
+    }
 
     /**
      * Checks if the Azguard Wallet extension is installed, by observing the `window.azguard` object.
