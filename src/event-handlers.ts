@@ -16,7 +16,9 @@ export class EventHandlers<T> implements IEventHandlers<T> {
 
     public dispatch(payload: T) {
         for (const handler of this.#handlers) {
-            try { handler(payload); } catch {}
+            try {
+                handler(payload);
+            } catch {}
         }
     }
 }

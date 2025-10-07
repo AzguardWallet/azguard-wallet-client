@@ -1,7 +1,7 @@
 {
     "name": "@azguardwallet/client",
     "version": "0.4.2",
-    "description": "Simple client for interacting with Azguard Wallet via inpage RPC with various providers",
+    "description": "Simple client for interacting with Azguard Wallet via inpage RPC",
     "author": "Azguard Wallet",
     "homepage": "https://github.com/AzguardWallet/azguard-wallet-client",
     "repository": {
@@ -13,10 +13,6 @@
         ".": {
             "default": "./dist/index.js",
             "types": "./dist/index.d.ts"
-        },
-        "./providers": {
-            "default": "./dist/providers/index.js",
-            "types": "./dist/providers/index.d.ts"
         }
     },
     "files": [
@@ -26,6 +22,6 @@
         "build": "rm -rf dist && tsc"
     },
     "devDependencies": {
-        "@azguardwallet/types": "0.4.1"
+        "@azguardwallet/types": "0.5.0"
     }
 }
