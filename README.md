@@ -47,7 +47,7 @@ if (!azguard.connected) {
             {
                 // specify one or more chains you want to connect to:
                 // "aztec:1674512022" - devnet,
-                // "aztec:0" - sandbox
+                // "aztec:0" - local sandbox
                 chains: ["aztec:1674512022"],
                 // specify a list of operations and actions your dapp is going to use
                 methods: ["send_transaction", "add_private_authwit", "call"],
